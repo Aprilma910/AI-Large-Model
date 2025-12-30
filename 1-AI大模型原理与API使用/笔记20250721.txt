@@ -1,0 +1,21 @@
+www.liblib.art
+一款具有未来感的流线型运动跑鞋，采用回收海洋塑料材质
+
+https://bailian.console.aliyun.com/?tab=model#/api-key
+pip install dashscope -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+qwen-turbo
+deepseek-v3
+deepseek-r1
+
+system：系统提示词
+user：用户提示词
+assistant：助手的返回内容（LLM推理的结果）
+tool: 工具返回的结果，就是函数return的结果
+
+AI编程工具可以帮助大家写代码
+
+
+1、跑通
+2、和AI交流，修改成自己的
+
