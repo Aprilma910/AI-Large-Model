@@ -1,0 +1,150 @@
+老师，问个问题，大模型能理解视图吗？如果有多张计算推理时间肯定会延长
+SQL视图
+时间与输入的token和输出的token 成正比
+正常的 首 token时间，一般在6-8秒
+
+Q：老师，使用cursor重构代码有什么技巧吗？
+我们自己要对代码重构有一些概念
+1）多余的函数：
+帮我查看是否有多余的函数/功能，先不修改代码
+2）梳理现有代码的逻辑，基于这个逻辑提出优化建议（收益比较明显的）
+
+Q：上节课的门票助手，WebUI 提示数据库连接失败，用数据库工具能访问数据库，是啥原因
+数据库能连接，说明连接是通的
+WebUI提示失败，说明代码中连接的有问题
+
+Q：能否让大模型直接给我写大模型？
+大模型是神经网络的参数，7B的参数，这个是训练出来的
+
+Q：Qwen Agent 是MCP吗？
+Agent 是智能体，自主调用 Funcation Call或者MCP
+MCP 是工具协议，Function call是工具本身
+
+Q：qwen agent应该算一个SDK
+是的
+
+Function Call 如果我们想要快速开发，不考虑给外部提供公开的服务，可以写成 Function Call
+
+Agent可以使用插件（工具：包括MCP，还有专门给Coze定制的插件）
+MCP
+https://modelscope.cn/home
+
+lbs.amap.com
+
+    "mcpServers": {
+        "amap-maps": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@amap/amap-maps-mcp-server"
+            ],
+            "env": {
+                "AMAP_MAPS_API_KEY": "XXX"
+            }
+        },
+    }
+
+需要找一个Agent，设置 mcp的参数 mcp.json
+
+用高德MCP，做上海一天旅游攻略
+
+帮我查询 从北京五道口到北京南站的行车路线
+
+
+www.taobao.com/robots.txt
+https://www.taobao.com/robots.txt
+
+帮我一段提示词，作用页面设计师，你的角色是制作网页，比如针对用户的旅行规划 撰写HTML。这个提示词用于Agent的指令
+
+Agent:
+1) system_prompt，指令
+2）MCP
+
+Q：agent的机制想了解下，他是机制上确定了优先MCP，然后再用自己的大模型，还是说他经过自己大模型的思考，最后决定使用MCP？
+LLM是通过prompt进行回答的
+system_prompt = """你是一个有用的助手，可以通过以下工具进行调用。
+这些工具包括：{tool_names} === 这里还会有更详细的 tool_name, tool_description, tool的参数，以及参数的description
+
+
+当你决定使用工具的时候，请输出工具的名称，以及对应的参数，以方便后续进行调用
+"""
+什么情况下需要用到多智能体，什么情况下更适用mcp呢
+智能体 就是一个人；
+如果一个人能解决这些问题，那么一个Agent是可以的
+如果一个人不能解决这些问题，因为它可能能力不够，它还可以通过其他的Agent来协作；
+
+一般多工具单agent和A2A哪个效果更好
+
+RAG 
+我在本地已经运行了 python txt_counter.py 这是一个FastMCP的服务
+我想在 assistant_ticket_bot-3.py 中的function_list中增加这个 MCP的调用
+
+2025-08-20 21:55:13,978 - mcp_manager.py - 122 - INFO - Initializing MCP tools from mcp servers: ['amap-maps', 'fetch', 'bing-cn-mcp-server', 'tavily-mcp', 'txt-counter']
+
+帮我增加一个tool，即修改桌面上的文件名称
+https://github.com/QwenLM/Qwen-Agent
+
+trae build
+setting.json
+
+result= {'date': '2025-06-20', 'weather': {'temperature': '25℃', 'condition': '雷阵雨'}}
+篮球安排结果: {'status': 'cancelled', 'reason': '恶劣天气'}
+
+result= {'date': '2025-06-22', 'weather': {'temperature': '22℃', 'condition': '多云转晴'}}
+篮球安排结果: {'status': 'confirmed', 'weather': {'temperature': '22℃', 'condition': '多云转晴'}}
+
+用Bing MCP，查找 黄金 相关的新闻
+https://www.tavily.com/
+
+user_prompt = 
+
+2025-08-20 21:42:33,454 - mcp_manager.py - 122 - INFO - Initializing MCP tools from mcp servers: ['amap-maps', 'fetch', 'bing-cn-mcp-server', 'tavily-mcp']
+2025-08-20 21:42:33,506 - mcp_manager.py - 340 - INFO - Initializing a MCP stdio_client, if this takes forever, please check the config of this mcp server: amap-maps
+Amap Maps MCP Server running on stdio
+2025-08-20 21:42:40,961 - mcp_manager.py - 350 - INFO - No list resources: Method not found
+2025-08-20 21:42:44,533 - mcp_manager.py - 350 - INFO - No list resources: Method not found
+2025-08-20 21:42:47,972 - mcp_manager.py - 350 - INFO - No list resources: Method not found
+2025-08-20 21:42:55,652 - mcp_manager.py - 350 - INFO - No list resources: Method not found
+
+
+{
+  "city": "上海市",
+  "forecasts": [
+    {
+      "date": "2025-08-20",
+      "week": "3",
+      "dayweather": "多云",
+      "nightweather": "多云",
+      "daytemp": "36",
+      "nighttemp": "28",
+      "daywind": "南",
+      "nightwind": "南",
+      "daypower": "1-3",
+      "nightpower": "1-3",
+      "daytemp_float": "36.0",
+      "nighttemp_float": "28.0"
+}
+
+MCP 调用次数越多 => 时间越长
+天气、景点查询，坐标，查看导航
+
+Q: 老师，cursor里设置一下高德MCP，然后进行旅行规划，不设置不是也能进行旅行规划么？只是所MCP更精准是么
+如果不通过MCP等工具调用方式，旅行规划是怎么来的呢？
+是LLM生成的结果
+
+https://modelscope.cn/mcp/servers/@modelcontextprotocol/fetch
+
+用Fetch MCP，将 https://k.sina.com.cn/article_7732457677_1cce3f0cd01901eeeq.html 网页转化为Markdown格式
+
+modelscope.cn
+
+
+
+用Fetch MCP，将 https://k.sina.com.cn/article_7732457677_1cce3f0cd01901eeeq.html 网页转化为Markdown格式
+
+Q：agent是怎么决策调用MCP的
+
+Q：也就是智能体本身以及具备这个mcp能力了是不，那这种情况应该不需要调用mcp了是吗
+Agent 要通过MCP来调用工具，工具是第三方的，不是Agent的，Agent只是看到有这个MCP，它可以去调用；
+
+
