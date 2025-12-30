@@ -1,0 +1,200 @@
+Q：自助式报表是bi吗
+主要是 Text2SQL，自然语言撰写SQL，进行数据表的查询
+
+Q：这个是不是要安装mysql？
+可以在本地安装MySQL，也可以先用我的云上MYSQL
+
+Q：PDF里面复杂表格不好提取内容
+是的，表格可能会有复杂的情况，比如 跨页，合并单元格的
+MinerU 可以将PDF中的图表、图片、公式进行解析
+
+Q：PDF是不是分两种？一种是word转的，一种是图片扫的
+对，图片扫描需要用到OCR
+
+Q：excel报表复杂的报表能识别么
+Excel是结构化的数据，一般我们用SQL进行处理
+
+Q：为啥千问读取简单的图片表格全是幻觉
+qwen-vl么？应该还可以的
+
+Q：刚开课时用百炼 现在又用modelscope 这两者有啥区别
+都是阿里云的
+百炼提供的是API，直接可以使用
+modelscope提供私有化模型的下载，可以下载到本地，用GPU进行部署和推理
+
+Q：老师，我在知识库喂给大模型后，遇到了大模型思考过程正确，但是答案不正确，我应该如何解决这个问题？
+你用的是 DeepSeek-R1推理模型么？
+1）换模型，比如 Qwen3系列
+2) 思考准确，可以提取<think></think>部分，作为上下文，然后再用 普通模型进行推理
+
+Q：我想把带表格的pdf导入copilot Studio的智能体中，尝试了用minerU识别后导出为md，但是发现copilot知识库不支持导入md，有什么好办法吗
+md本身也是 txt格式，你可以把文件名的后缀改成 .txt
+
+非结构化数据：PDF, Word，图片
+结构化数据：Excel, SQL
+
+SQL结构化  VS NoSQL结构化
+
+如果不是专门部署代码大模型，大部分公司还是部署的通用大模型，Qwen3-8B, 32B, DeepSeek-R1
+个人使用，推荐闭源的SaaS模型，比如 豆包，Qwen-Turbo-latest
+
+SQL Agent（来自LangChain）封装了一系列的工具
+1）sql_db_list_tables
+2）sql_db_schema
+
+Step1, sql_db_list_tables
+对所有的数据表进行筛选 => heros
+Step2，sql_db_schema
+查看具体的数据表，参数 heros
+Step3，sql_db_query
+避免：请删除所有的数据表 
+sql_db_query 查询，得到查询结果
+
+Q：AI为啥这么自信用户要的是最高攻击而不是初始攻击呢？
+攻击力最高 => 关联到了数据表的字段 attack_max 
+
+Q：本地电脑要有表数据
+本地可以没有数据表，我这边给的是云上的MySQL
+当然如果你本地有数据库，可以链接你本地的MYSQL
+localhost:3306
+
+SELECT Name, PhoneNumber FROM customerinfo LIMIT 10
+
+SELECT p.PolicyNumber, c.Name
+FROM policyinfo p
+JOIN customerinfo c ON p.CustomerID = c.CustomerID
+WHERE p.PremiumPaymentStatus = '未支付'
+
+ChatBI
+
+Q：如何核对数据是否正确
+出给测试集（比如10个Query，以及SQL查询之后的结果）
+让AI给出SQL => SQL查询 => 得到结果，与真实的结果进行比对
+
+Q：很多场景都是查询内部数据，是不可能让用api的，会把内部查询情况泄漏出去，这种是不是只能本地部署了？
+是的，可以本地部署的
+
+Q：用text2SQL，按它的逻辑，我们还要给它root权限？
+这里的 text2sql 给的是 数据表的访问权限
+
+
+Q：PDF的较为复杂的表格，需要识别并组织出结构化的数据，需要和ACCESS数据进行对比检查。如何实现，PDF识别的数据如何组成结构化数据，如何将两套数据比对？
+Step1，PDF的识别，提取表格信息
+需要用到第三方的PDF识别的工具，MinerU
+Step2，将提取的 .md中的表格 => 写入到 .csv （可以让LLM来）
+csv的数据格式：111, 222, 333
+
+Step3, 让LLM撰写SQL，获取 access的数据内容
+Step4，进行比对
+
+qwen-chat
+最早训练出来的大模型：就是补全模型
+我们写前面，AI大模型帮我们写后面
+我们写注释，AI大模型帮我们写代码
+
+
+Q：老师，LLM + RAG方法，怎么处理安全问题，比如SAAS平台里的数据，只能查自己租户的数据，不能查到其它租户数据
+权限管理，
+MySQL 有权限管理，会指明 具体用户的数据表的权限
+RAG 向量数据库，可以保存：向量、原始文本、metadata（文件名、创建时间、作者、标签）
+
+标签：财务 （RAG数据，用户都有标签）
+
+Q：老师Embedding课件中，所有的cases没有把原始内容存在faiss中，那如何将它们和faiss一起存储呢？
+
+第一个index 存了索引与embeding的关系，第二个index 里存放了索引与metadata的关系
+
+Q：原始内容要额外db存放
+是的，有很多工具可以存，比如 Redis, MySQL
+数据量不到，用Redis放到内存中，非常快
+如果数据量比较多，可以用MySQL进行管理元数据
+
+Text2SQL，让AI大模型自己写SQL
+方法1 text2sql function call：就是让AI大模型写SQL，比如 我们给它 LLM Prompt，然后使用 qwen-turbo进行撰写SQL，解析SQL
+
+方法2 跳过了单独撰写text2sql的函数，直接写一个 exc_sql 的函数
+
+function call 函数调用，
+exc_sql，传入sql_input参数
+AI大模型 如果要调用exc_sql，就需要传入 sql_input（AI大模型需要生成 sql_input，然后调用 exc_sql工具来得到结果）
+
+Q：没看明白，为什么Exec_sql要大模型来做，直接把sql传给接口就好了啊
+
+
+Q：就是从文本，到sql，到数据，如果我们提供的提示词越准确，就等于sql写的越好，数据越好，是不是这样？
+是的，所以需要把 metadata 数据表的定义，一些术语的定义，给到大模型
+
+Q：数据都在excel里，是让大模型写Power Query吗？Langchain有封装好的函数吗？
+SQL的能力更强大，是否可以将 excel数据导入到 SQL数据库
+sqlite
+
+Q：这里存在设计一个隐患：服务器性能的问题，同时多人查询，有可能导致服务器资源被占用，影响其他端的查询。这个资源应该如何更好的控制呢？
+数据库的连接池，假设有20个数据库的可以连接的资源，放到 pool里面
+每次从 pool中找到一个 空闲的资源进行连接
+
+
+Q：怎么确保大模型生成的SQL是正确的？
+大模型生成的SQL 可能有出错的情况；
+模型A：生成SQL
+模型B：检查SQL，对还是不对
+
+Q：这个准确率，怎么做评测集呢
+SQL准确率，可以用一些客观题
+
+Q：私有化部署时,有全局prompt概念吗?一些对表的基础说明,不希望跟llm每次对话都加,会影响效率吧?
+prompt 不一定只有一个通用的，可以有多种prompt
+如果prompt只有一个 => 里面的规则会很多，让LLM记住所有的规则，实际上也增加LLM的认知负荷
+分类，而不是一一刀切
+
+api 调用，比如用qwen turbo的话，可以简单演示一下吗？
+
+Q：如果针对单张表的数据权限, text2sql应该怎么去做
+heros 针对这张表，给一些人开通查询权限；
+主要是在数据库端，进行 grant
+
+Q：相比于lanchain和自定义prompt，vanner的主要优点有哪些，用token多吗
+自定义prompt 它的token应该是最少的，因为可以自己来控制
+vanna的优势：
+1）向量数据库的管理 （DDL，文档，错题本）
+2）画图
+
+
+Q：老师，自己手动使用llm+ RAG来实现text2sql有案例？，是否可以帮我们过一下流程？
+prompt = """
+以下是用户的问题：{query}
+数据库的数据表的定义：{create_sql}
+
+之前类似的问题回答：
+{RAG-qa}
+"""
+
+docs = knowledgeBase.similarity_search(query)
+
+Q：感觉他说的数据权限,是指这张表里有100条数据,某个人只能通过某个字段限制他只能读取其中20条
+
+
+Q：在开发Text2SQL自助式数据报表AI系统时，如何避免SQL安全隐患，包括防止SQL注入攻击？谢谢
+
+SQL注入，你可以通过 sqlachelmy 来进行调用SQL，而不是直接通过原生的SQL进行查询
+SQL检查， 1 where 1=1
+有时候用户query的内容，会放到LLM中进行推理
+事前的query审核
+事后的db query审核
+
+你可以让大模型LLM，生成SQL的时候，按照一定步骤
+Step1，先判断query是否符合执行的要求（比如安全性）
+Step2，生成SQL
+
+返回JSON格式：{
+ "is_safe": yes or no
+ "sql_input": ...
+}
+
+Q：老师，既然不能保证LLM生成的sql不能保证完全正确，你们在做商业项目的时候，用户能接受吗？怎么去说服客户
+AI大模型在落地的过程中，客户都很关注准确率
+测试集作为金标准，比如准备1000条测试query，让AI大模型进行生成，进行评分
+
+
+
+
+
