@@ -1,0 +1,184 @@
+http://reverie.herokuapp.com/arXiv_Demo/#
+
+Q：老师 langchain-agent 和Qwen-agent，各有什么特性？
+LangChain 自带了很多 Agent，比如SQL Agent
+也比较适合工作流的编排
+Qwen-Agent 更偏向于Agent开发，自主调用 RAG，工具的能力，代码比较简洁
+
+
+Q：老师，mcp的sse和npx的区别是什么，还有哪些协议？
+sse 通过网页进行访问，事件驱动
+websocket, stdio, python
+
+Q：在场景下如何选择到底是用Langchain还是用agent的呢
+工作流是否是固定的形式？是否有固定的顺序 => Workflow
+如果没有固定的顺序，需要Agent自主来进行决定 => Agent
+
+Q：实际工作中会用比较快实现的低代码比如dify，然后再做成高代码吗，这种方式主流吗
+Dify 低代码
+高代码 Qwen-Agent
+
+在企业中，用哪个的比较多呢？
+相对比较多的： Coze，Dify （低代码，门槛低）
+LangChain/LangGraph (外企相对用的多一些）
+Qwen-Agent
+Coze-Studio
+https://adp.cloud.tencent.com/adp/#/experience-center/home?origin=all&spaceId=default_space
+
+https://github.com/coze-dev/coze-studio
+https://github.com/QwenLM/Qwen-Agent
+
+千问AGENT在哪里下？
+pip install qwen-agent
+
+Agent A =》 Agent B =》 Agent C
+
+如何让你的AI Agent保持简洁性？
+1）LLM system prompt
+2) Function Call
+
+角色转换：
+站在工作者的角度，大家已经对我们的工作很了解
+站在大模型的角度，prompt
+
+私募基金的合格投资者标准是什么？
+
+RAG VS Tool调用
+RAG 是固定的流程，query => query embedding => 在向量数据库中进行相似度的检索 => query +context (RAG chunks) 回答用户的问题
+
+Tool调用
+在工具里面，进行了某类知识的检索 => 返回给大模型
+
+Q：如何提升回答的准确率呢？调整提示词吗？如果提示词调了没有用是不是还要调整知识库啊，工作流啊，甚至微调这些的。
+1）调整提示词
+2）RAG 调整embedding方法，调整召回的策略，重排的策略，chunk切分的方法
+3）知识库，整理知识的summary
+4) Tool，打造适合的工具，返回对应结果
+
+Disney 智能客服，
+帮我规划一日游路线
+1）交通
+2）天气
+3）内部信息的整理 Tool
+
+
+Q:反应式架构的tools是已经固定的吗？如果tools的范围固定 ，那和不用agent有什么区别 
+Tools的范围是固定的，但是它是 AGENT模式
+Worflow = ToolA => ToolB => ToolC
+
+Q：高代码对比低代码的优势是什么
+低代码：可视化比较直观，对于业务同事比较优化
+高代码：不是很直观，但是可以通过
+agent.get_graph().draw_mermaid()
+生成工作流的流程图
+
+Q：我感觉低代码和高代码的整体业务逻辑是一样的，所以可以先用低代码跑一下，再用高代码落地？
+是的，这是一个不错的方式
+低代码做POC，Demo
+高代码做个性化的落地
+
+能cursor把langgraph转化成qwen-agent
+
+@deliberative_research_langgraph.py 这个是基于langgraph实现的，帮我使用qwen-agent进行实现，参考 @assistant_ticket_bot-3.py，编写到 新的 .py
+
+工作流 VS Agent
+工作流：固定的流程 collect => analyze => report
+Agent：先制定整体的流程（相当于 流程的设计）
+collect => analyze => report
+
+Q：深思熟虑式，混合式，如何减少幻觉
+LLM直接给答案 （容易有幻觉）
+LLM + Tool/RAG 给答案 （可以降低幻觉）
+
+        # 构建Agent提示模板
+        class SimplePromptTemplate(StringPromptTemplate):
+            def format(self, **kwargs):
+                return f"用户问题: {kwargs['input']}\n 请根据需要调用工具，直接给出答案。"
+这里需要在提示词说明使用 tool_names 中的工具
+
+还是没有调用工具，可以参考 @fund_qa_langgraph.py
+
+Q:这种不确定性怎么解决
+尽量用工具来实现，增加确定性
+在工具中增加一些调试，观察 Agent都调用了哪些工具
+
+Q：他也是智能，不允许被打断，基于你对他的信任，是这样吗
+Agent是围绕目标，自主来完成
+
+Q：感觉“智能投研助手（深思熟虑）”这跟固定工作流没啥区别呀？还是固定的流程节点？
+工作流的模式：固定节点
+先规划都有哪些步骤，然后再按照步骤来执行
+
+
+我的混合式代码直接运行，响应结果是正常的，老师你的要Cursor调试用tool，这种情况怎么解释
+
+除了StateGraph外，LangGraph中还有其它可替代Graph组件吗？用于简化代码量
+
+用不同平台搭建的agent，应用程序调用起来的方法是否一样的？
+Agent框架只是运行的载体（提供了很多封装的组件）
+搭建Agent，主要是
+1）是用 工作流 还是 智能体
+2）如果是工作流，节点的流程是怎样的
+3）如果是智能体，都有哪些工具 可以调用
+
+问题是，LLM自作聪明，给了工具也不用。
+如果想要增加稳定性
+1）放到节点中，进行执行
+2）如果是LLM来决定是否调用工具，主要通过prompt来影响
+可以在prompt里说明都有哪些tool_names，以及遇到什么情况，可以使用什么工具
+
+Q：想看下测试用例，如何定义大模型回答是否符合要求，标准是什么？
+测试用例.xlsx 
+问题、标准答案、评测点
+
+LLM进行评估
+
+system_prompt = f"""你是一个专业的QA测试评估专家。
+请比较机器人的实际回答与标准答案，判断回答是否方向性一致。
+
+{eval_criteria}
+
+请严格按照以下JSON格式返回评估结果：
+{{
+    "eval": 1,
+    "comment": "方向性没明显冲突，虽然细节说明不同"
+}}
+
+其中eval值：1表示正确，0表示错误
+comment：如果eval=0，需要说明为什么方向性不一致，提供明确不同的地方，不需要给建议"""
+
+        user_prompt = f"""
+问题：{question}
+
+标准答案：
+```
+{standard_answer}
+```
+
+机器人实际回答：
+```
+{bot_answer}
+```
+
+请评估机器人回答是否方向性一致，并给出说明。"""
+
+
+Q：老师用Python 自研模式，会不会比用LangGraph或者Qwen Agent要复杂的多，还是也差不了多少
+建议还是要用Agent开放框架，比如 Qwen-Agent （灵活）
+
+深思熟虑改成用 Qwen-Agent 后没有 LangGraph 提供的结果丰富
+
+
+excel能用大模型写用例吗？
+1）整理测试用例的问题
+把你的项目文件，上下文的文件 给到大模型（比如 Kimi）
+让它给你不同的测试用例的问题
+2）调用 kimi api，针对这些问题，撰写答案
+将问题、答案 写入到 .xlsx
+3）人工检查
+
+Agent = prompt + tool (工作流）
+
+
+
+
