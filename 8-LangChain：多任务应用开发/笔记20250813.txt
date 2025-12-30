@@ -1,0 +1,216 @@
+Q：老师好，langchain和dify、扣子是对标的吗？
+都是AI Agent搭建平台
+dify, coze属于低代码
+langchain属于高代码
+
+Q：老师，这么多第三方包，有什么窍门能快速了解它们的api
+1）业务驱动
+2）让Cursor帮整理该工具的使用方法
+
+Q：现有数据库数据怎么转成向量数据库
+向量数据库是存储向量，做相似度检索的
+传统的SQL数据，是结构化（精确查找）
+这两个需求场景不一样
+
+向量数据库，可以使用 faiss, milvus, chromdb
+
+Q：老师，10个token的问题和10000个token的问题输给模型向量化都是一样的维度吗
+是的，向量化就是标准化，不管你的输入长度是多少
+
+Q：N8N\dify\coze哪个更推
+coze已经开源了，可以关注下Coze
+
+Q：wanna generate sql 时，在向量数据库中检索与问题相似的sql/question对，这个pare对是何时产生的？
+query => 会在qa向量数据库中检索 相似的question，如果找到了，可以将 answer作为参考
+
+业务价值 => value很高，diversity 很广泛
+技术价值 => 用一个框架，解决很多问题 LangChain
+
+逻辑思维
+A => B => C => D
+
+LangChain, LangGraph 是一家，LangGraph是LangChain升级版本
+LangGraph的能力 >= LangChain（线性）
+
+serpapi.com
+
+Memory 针对AI Agent
+
+Q：如何创建个人的知识库，并可以智能问答？
+1）Tool
+不同的需求，调用不同的Tool，根据 query 和 tool description之间的匹配进行调用
+2）RAG
+query => 与RAG中的chunk进行相似度的匹配（基于embedding）
+=> 选出Top5的chunk 给到LLM进行回答
+
+Q：这个就是Function Call吗
+是的， LangChain更早的提出了Tool调用，后来openai把它集成到了大模型中，提供了这种能力
+
+Q：Tool和RAG各有啥适用场景？
+RAG就是知识库的使用场景，智能客服，问答
+Tool的场景就太多了，基于任何功能，都可以封装成Tool，比如查天气，查新闻，计算数学题
+
+Q：Function Call里面你也可以自己去调用别的api查询 ，但得是同步操作返回，对吗
+是的，比如你可以在Function Call中，使用 Claude写代码
+
+Q：tool是agent的一部分吗？
+是的，Agent是全集，是组装工厂，在工厂里面Tool是重要的一个环节
+
+Q：最终项目落地可以用coze么？
+如果不考虑数据安全问题，可以用Coze
+或者你有本地私有化部署的版本
+
+@5-product_llm.py 帮我使用LangChain中的ReAct模式简化这个代码，写入到 6-product_llm.py
+
+
+投研分析，
+task1：中芯国际 调研它最新的制程的进展
+调用搜索tool，输入对应的关键词 => 
+没有找到，
+继续调用搜索tool，输入关键词
+
+fewshot 跟React 有什么关系？
+fewshot 小样本的示例，给它大模型作为RAG 上下文知识
+
+ReAct是思考模型，大模型如何工作的，思考 => Action Action Input => 观察 => 思考 ...
+
+Q：什么样的场景需要用ReAct模式？
+对于有一定复杂程度的问题，可以让AI自己进行探索
+
+Q：怎么保证调用工具之后回答内容的安全性？我问怎么造炸弹，类似这种问题怎么回答
+做一个安全审核工具
+
+
+两个问题1:ReAct背后的实现原理; 2、如何优雅的对langchain.agents支持的tool进行扩展
+    # 组合工具
+    tools = [
+        Tool(
+            name=text_analysis.name,
+            func=text_analysis.run,
+            description="分析文本内容，提取字数、字符数和情感倾向"
+        ),
+        Tool(
+            name=data_conversion.name,
+            func=data_conversion.run,
+            description="在不同数据格式之间转换，如JSON、CSV等"
+        ),
+        Tool(
+            name=text_processing.name,
+            func=text_processing.run,
+            description="处理文本内容，如查找、替换、统计等"
+        )
+    ]
+    # 创建Agent
+    agent = create_react_agent(llm, tools, prompt)
+
+实现原理：LLM自我对话的过程
+=> 我要完成 XXXX，我看到了 {tools}，我可以选择 某一个tool，传入 tool input
+=> 在代码中调用这个tool，传入相应的 tool input => 得到 tool的output
+
+=> 我要完成 XXXX，我看到了 {tools}，我可以选择 某一个tool，传入 tool input
+
+
+Q：跟COT的差异是什么？action也可以看做是chain的一环，不可以么？
+CoT 思维链，是事先确定好的工作流程
+Step1, 写标题
+Step2，写内容
+Step3，写结尾
+确定的步骤
+
+ReAct 自主思考，利用自问自答的方法，自己选择tool
+=> 在环境中，执行tool，看到结果
+=> 自己选择下一个tool
+
+Q：这种是不是用非推理模型会比较好？
+是的
+
+Q：react会多次调用大模型吗
+是的
+
+Q：react 怎么决定先用哪个tool？
+大模型自我提问
+
+
+你是一个智能助手，通过调用工具来回答用户问题。
+目前我们有两个工具：
+        Tool(
+            name="查询产品名称",
+            func=tesla_data_source.find_product_description,
+            description="通过产品名称找到产品描述时用的工具，输入的是产品名称",
+        ),
+        Tool(
+            name="公司相关信息",
+            func=tesla_data_source.find_company_info,
+            description="当用户询问公司相关的问题，可以通过这个工具了解公司信息",
+        ),
+
+===
+用户问：Model 3怎么样？
+请告诉我，你要用哪个工具，传入什么参数
+
+compute (args='Model 3')
+
+def hello():
+    print("Hello from hello()!")
+
+def greet(name):
+    print(f"Hello, {name}!")
+
+current_locals = locals()  # 获取当前局部变量（包括函数）
+
+func_name = "hello"  # 想要调用的函数名（字符串）
+
+if func_name in current_locals:
+    current_locals[func_name]()  # 调用 hello()
+
+
+帮我搭建一个网络故障诊断类的Agent，工具之间存在串联，第一个工具的输出是第二个工具的输入；如果有10个工具的话，会有很多输入输出的关系。
+希望Agent，在适当的时候调用适合的工具；
+===
+可以参考@1-simple_toolchain.py 编写新的Python
+
+
+
+Q：tool的描述如果乱写，大模型会不会产生很严重的错误？
+会的 
+
+Q：业务系统的日志，每小时上 G 的日志，有没有好的办法分析
+Step1，先通过关键词定位位置，做个粗筛，还需要通过时间范围进行筛选
+Step2，把有问题的日志整理起来
+=> 如果文字量不大的情况下，可以让LLM进行解读，
+
+Q：老师，最近一直有个疑惑：如何学习大模型才能达到最终自己自主开发和应用的能力？
+1）先找业务场景 （目标）
+2）选择适合的方案
+方法1：RAG LangChain RAG方案
+方法2：LangChain ReAct + Tool方案
+
+3）实施
+@之前的代码，描述你现有的场景
+
+Q：这阵子用lingma写东西，然后调试起来也是超级耗时间
+写代码速度很快，比如5分钟，调试可能要50分钟
+
+Q：能讲一下如何用这节课的知识，做虚拟助教，提供个性化学习建议，解答学生问题吗
+LangChain
+Model：Qwen-Turbo-Latest
+Prompt：虚拟助教的指令（调用知识库回答），可以调用 XXX工具
+
+tool：个性化定义 + RAG Tool
+
+Q：老师，如果做RAG，知识库从多个pdf读取，比起单个pdf有什么要注意的地方吗？（比如需要把每个chunk和哪个文件联系起来吗）
+1）chunk的metadata（比如 源文件）
+产品A
+产品B
+2）召回策略
+
+Q：memory长期机制怎么做的
+vector-db 存储历史的memory，量可以很大
+使用过程中，需要短期memory，即从 vector-db中进行 query相似度的检索 => 找到有关的 memory chunk
+
+
+根据故障描述，按照系统分类测试用例编制要求。通过上传文件自动生成试验的测试用例。老师，这个场景，用什么框架。需要把原来的测试用例做成知识库做参考吗？
+需要通过知识库进行管理
+
+
+
