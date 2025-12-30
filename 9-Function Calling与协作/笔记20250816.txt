@@ -1,0 +1,176 @@
+Q：QWEN3满血版和QWEN3-coder是包含关系吗
+不同的模型
+https://modelscope.cn/models/Qwen/Qwen3-Coder-480B-A35B-Instruct
+
+https://modelscope.cn/models/Qwen/Qwen3-235B-A22B-Instruct-2507
+
+Q：激活是什么意思？
+一共480个文件，进行推理使用的文件数量是35个
+480B 是全部的参数，但是一次使用，不是全部的480B同时工作，而是其中的35B
+
+Q：老师，text2sql这节课的Chat2BI源代码在哪里可以取到？
+langchain, 手写，vanna
+
+Q：老师有个问题：利用SQL+向量数据库+LLM做业务助手，向量化我是每张表向量化还是把db下面的表作为一个大文件一起向量化，
+
+向量数据库 可以存储<Q，A>
+数据库的建表语句，会放到prompt中
+
+Q：35b是moe技术实现的吗？
+
+Q：为什么不使用所有的，会不会有准确度的损失
+那个是dense
+
+Q：老师我做练习的时候调用qwen的模型经常出错，调了半天，改成deepseek才成功运行
+
+Q：老师，vanna 中针对ddl, sql QA, 和 documents，我们每次都要 train么？
+
+Q：我想搭建一个基于公司的产品手册的知识问答，公司每个系列的产品都有一个手册，是每个手册都创建一个db吗
+可以的，这是一种路由的方式，可以更有效的筛选知识库
+
+Q：陈博士，请问下如何在一个算力服务器里面同时运行多个大模型的？
+
+https://modelscope.cn/mcp
+
+Qwen-Turbo-Latest 速度快，数学能力不行
+
+Q：think模型是因为运用了reward模型么？
+先自言自语，理解用户的问题，思考可能性的维度
+
+tool_call= {'function': {'name': 'get_current_weather', 'arguments': '{"location": "北京"}'}, 'index': 0, 'id': 'call_75355d44e51043d79723a8', 'type': 'function'}
+
+查询结果：{'status': '1', 'count': '1', 'info': 'OK', 'infocode': '10000', 'lives': [{'province': '北京', 'city': '北京市', 'adcode': '110000', 'weather': '晴', 'temperature': '27', 'winddirection': '南', 'windpower': '≤3', 'humidity': '81', 'reporttime': '2025-08-16 20:09:00', 'temperature_float': '27.0', 'humidity_float': '81.0'}]}
+
+response= {"finish_reason": "tool_calls", "message": {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": "get_current_weather", "arguments": "{\"location\": \"北京\"}"}, "index": 0, "id": "call_4fe0ee12595a45a5823212", "type": "function"}]}}
+
+tool_call= {'function': {'name': 'get_current_weather', 'arguments': '{"location": "北京"}'}, 'index': 0, 'id': 'call_4fe0ee12595a45a5823212', 'type': 'function'}
+查询结果：{'status': '1', 'count': '1', 'info': 'OK', 'infocode': '10000', 'lives': [{'province': '北京', 'city': '北京市', 'adcode': '110000', 'weather': '晴', 'temperature': '27', 'winddirection': '南', 'windpower': '≤3', 'humidity': '81', 'reporttime': '2025-08-16 20:09:00', 'temperature_float': '27.0', 'humidity_float': '81.0'}]}
+
+方法1：大模型 调用 Function Calling
+Step1，大模型给你调用方法，比如 tool_call= {'function': {'name': 'get_current_weather', 'arguments': '{"location": "北京"}'}, 'index': 0, 'id': 'call_4fe0ee12595a45a5823212', 'type': 'function'}
+Step2，你看到这个function name 和 function arguments，将参数解析出来
+传入到函数中运行，得到结果
+
+方法2：Qwen-Agent
+
+
+Q：weather_tool函数结构上数据到get_weather_from_gaode函数使用functioncall功能
+get_weather_from_gaode函数，是对高德地图API的封装
+https://github.com/QwenLM/Qwen-Agent
+pip install -e ./"[gui,rag,code_interpreter,mcp]"
+
+gui 图形化界面
+rag RAG知识库
+code_interpreter 代码解析器，帮你执行Python代码
+MCP 模型上下文协议
+
+Q：python 代码同大模型的关系，不是说大模型只能文字对文字吗
+大模型就是 文字input => 文字output
+
+程序是主体，里面调用LLM，得到提示（用哪个函数，传入什么参数）=>程序来运行这个函数
+
+for response in bot.run(messages):
+
+基于Gradio 
+
+Q：如果生成SQL是不是用Qwen-coder-14B会好些，而不是用Qwen-turbo-laster
+是的 Qwen-Coder会好一些
+
+Q：陈博，刚刚门票部分的提示词里面的特殊案例提示词如何写呢？比方说1.5天这种，如何提出公用的提示词写法呢？
+prompt = """
+1、你是一个XXXX（角色说明），你任务是XXX
+2、提供上下文
+如果ChatBI，需要提供 数据表的结构metadata
+如果RAG，需要提问 RAG chunks
+3、提供术语（黑话）
+4、bad case
+<q, a>
+"""
+
+Q：如果建表语句，有更新，也要把代码进行更新吗？有更好的解藕办法吗?
+方法1：在prompt中更新
+方法2：提供数据库的直连，每次重新获取metadata
+LangChain
+
+Q:一定要有建表语句吗？对sql 不了解的；在编写提示词的时候怎么解决呢
+如果是数据查询，是需要建表语句，方便了解都有哪些数据表，以及对应的字段
+
+Q：qianwen agentz怎么用的，刚才打开那个网址，放在聊天框里好吗
+在文件夹中输入 cmd 进入到命令行
+然后输入：python assistant_ticket_bot-1.py
+===
+正在启动 Web 界面...
+助手初始化成功！
+Web 界面准备就绪，正在启动服务...
+* Running on local URL:  http://127.0.0.1:7860
+
+To create a public link, set `share=True` in `launch()`.
+===
+Qwen-Agent启动了一个页面，你可以在页面上和助手进行交流
+
+
+Q：老师你刚才查询的时候出了一个柱状图，那个prompt是什么？
+是我们写一个 function calling，然后大模型来调用
+你也可以在原有的function calling(exc_sql) 中增加 图表生成的功能
+
+qwen-agent的页面是基于gradio （开源web页面）
+gradio, streamlit
+
+Q：sql调用数据库似乎少了很多组件 各种错误
+pip install mysql-connector-python
+
+我让ai帮着装的，ai搞了半天
+给AI以逻辑
+
+Q：老师，有没得的可以画图标的大模型
+文本大模型 => 写代码 （生成matplotlib图表，或者生成 echarts图表）
+
+这样后端生成的图通常没有办法交互,感觉还是直接返数据,画图由前端来做
+
+让大模型写了一个 echarts的数据，放到页面进行 echarts渲染
+[ECHARTS_CONFIG]
+{"title":{"text":"销售统计","left":"center"},"tooltip":{"trigger":"axis","axisPointer":{"type":"shadow"}},"legend":{"top":"10%","data":["visitor_count"]},"grid":{"left":"3%","right":"4%","bottom":"3%","containLabel":true},"xAxis":{"type":"category","data":["北京市","江苏省","河北省","山东省","广东省","上海市","浙江省","辽宁省","湖北省","四川省"],"axisLabel":{"rotate":45}},"yAxis":{"type":"value","name":"门票数量"},"series":[{"name":"visitor_count","type":"bar","stack":"total","data":[18883,8932,8852,8285,8078,7726,7151,4697,4528,4280]}]}
+[/ECHARTS_CONFIG]
+
+@assistant_ticket_bot-2.py 现在的画图是用的 matplotlib，我想改成echarts，将生成的数据给到 gui进行显示。
+帮我查看 qwen-agent中的gradio gui的实现方式，是否可以增加 echarts显示的部分
+帮我设计方案（先不用修改代码）
+
+Q：如何发布qwen-agent，让其他人使用
+方法1：
+        WebUI(
+            bot,
+            chatbot_config=chatbot_config
+        ).run(share=True)
+方法2：
+放到服务器上，server_name="0.0.0.0"
+server_port="你指定的服务器端口，比如9001"
+
+本地部署 127.0.0.1:7860
+远程访问：share=True
+服务器部署：放到服务器上，server_name="0.0.0.0"
+server_port="你指定的服务器端口，比如9001"
+
+Qwen-agent下载下来后需要在配置文件里面配置什么吗。还是直接执行pip install就行了？
+不需要配置，直接pip install
+pip install -e ./"[gui,rag,code_interpreter,mcp]"
+
+Q：qwen-agent和扣子和dify是一个类型的东西吗？
+都是AI Agent开发平台
+qwen-agent 属于高代码，
+coze和dify 属于低代码，基本不需要写代码，通过拖拉拽节点来完成
+
+大模型调用function call是训练的，与大模型调用MCP逻辑是一样的。
+所以如果一个大模型会调用function call，那么它调用MCP就比较容易
+MCP是模型上下文协议
+
+Q：如果把扣子集合到某个系统中 通过链服务接口的方式 调用呢
+coze搭建完成后，可以发布到API
+其他系统就可以通过API的形式，使用 coze agent
+
+Q:qwen-agent和langchain对应的应用场景会有什么区别
+都是AI Agent开发
+qwen-agent跟更偏向于Agent模式，AI自主完成一切
+langchain有很多工作流模式
+
+
