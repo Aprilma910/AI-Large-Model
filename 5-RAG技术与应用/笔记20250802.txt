@@ -1,0 +1,193 @@
+Q：输入不同长度的文本为什么在embedding后维度一致？
+是的，embedding之后 维度都一样了
+这样才好比较，才能做计算
+
+Q：bge代码最低需要什么配置才能跑通
+https://modelscope.cn/models/BAAI/bge-m3/files
+2.3G文件大小，CPU也可以跑通，或者显存 >=4G
+
+Q: 这些怎么在linux环境下部署？py脚本做的faiss
+和windows差不多，同样需要 pip install 所依赖的安装包
+然后运行对应的 .py
+你可以在 linux中的jupyter运行 .ipynb
+
+Q：pip install gensim
+有可能和依赖的python其他安装包的版本相关
+
+Q：embedding之后是不是会有很多向量一样的？一样就是含义相似？
+含义是否类似，是用 向量相似度进行计算
+
+Q：公司资料库中有很多技术文档、标准等pdf，包含很多表格。大模型回答问题时需要精确数据，RAG效果是不是不太好？有什么解决方案吗？
+用mineru，可以将 pdf中的表格、图片 转化为 markdown格式
+
+Q：语音可以转到知识库吗
+先将语音转化为文本 => embedding
+
+pip install faiss-cpu, 如果要装gpu版本，conda install -c conda-forge faiss-gpu
+
+Q: 之前有客户需要语音识别为文字，文字转换成代码，然后执行代码，我们的专家推荐SFT而不是RAG，这是出于什么考量啊？
+一般的逻辑是：先RAG，不行再SFT
+客户嫌弃COT太长
+
+推荐系统
+
+Q：embedding模型一定需要自己训练吗
+可以用别人训练的
+
+load_qa_chain是LangChain封装好的专门用于QA问答的工具链
+1）LLM的调用
+2）chain_type = stuff
+
+Q: LLM怎么用的能举个例子吗？
+prompt = """
+以下是用户的问题：{question}
+以下是我从知识库中检索出来的相关知识：
+{chunk_list}
+
+请根据知识库，回答用户的问题。
+答案是：
+"""
+
+RAG的效率（回复速度）
+< 10S （首token）
+<=5S （理想状态，首token）
+
+
+图像embedding：
+1）CLIP openai 2021 => 512维向量
+2）多模态embedding
+https://modelscope.cn/models/iic/gme-Qwen2-VL-2B-Instruct
+3）Qwen-VL进行图像理解
+input 是 png图像
+output 是 Qwen-VL的理解文字 => 文字的embedding
+
+
+
+Q：我有个问题：提示词的背景知识都给了这么多了，基本能直接回答用户问题了，那我还还要向量化做什么？这里不太明白。
+
+背景知识怎么来的 => 就是通过embedding相似度计算，从知识库中筛选出来的
+embedding计算的目的就是 filter
+
+
+{"status_code": 200, "request_id": "5d80cf14-569a-9b4c-8e8a-d467c19379c1", "code": "", "message": "", "output": {"text": null, "finish_reason": null, "choices": [{"finish_reason": "stop", "message": {"role": "assistant", "content": [{"text": "这是一张上海迪士尼度假区的万圣节主题海报。海报上写着“万圣趴”和“Halloween Time 玩心大开 ROCK ON, WICKED FUN!”，表明这是一个以万圣节为主题的活动。海报中展示了多个迪士尼角色，包括唐老鸭、白雪公主、睡美人等，他们都穿着万圣节风格的服装，背景是上海迪士尼乐园的标志性城堡，城堡被灯光装饰得非常华丽，营造出一种神秘而欢乐的氛围。海报上方有“SHANGHAI DISNEY RESORT”的标志，表明这是在上海迪士尼度假区举办的活动。整体设计充满了节日的气氛，吸引游客参与这
+个特别的万圣节庆祝活动。"}]}}]}, "usage": {"input_tokens": 459, "output_tokens": 151, "input_tokens_details": {"image_tokens": 434, "text_tokens": 25}, "prompt_tokens_details": {"cached_tokens": 0}, "total_tokens": 610, "output_tokens_details": {"text_tokens": 151}, "image_tokens": 434}}
+
+Q：BGE-m3模型怎样切片？
+Step1, 先切片，可以人工指定规则，比如  固定长度，LLM切片
+Step2，将切片 => 进行 BGE-m3 embedding
+
+Q：如何提高query的准确度，说说query改写策略
+query
+问法A，实际上还有很多类似的问法，在langchain有对应的工具，可以帮你多问几个类似的问法
+query：深度学习都有哪些不错的策略？
+可以让LLM进行改写，针对用户的问题，提出可能得答案方向
+
+知识A：优化器有哪些。。
+知识B：学习率如何设置
+
+
+CLIP模型
+https://modelscope.cn/models/openai-mirror/clip-vit-base-patch32/files
+
+测试集 Q，A
+
+
+今晚的知识点吗？embedding、langchain、多模态检索、切片策略和
+今晚RAG3个step：数据预处理、检索、生成的关系.我理解这一堆就是RAG
+
+1、Embedding：对原文进行压缩 （embedding_size=1024），方便后续进行数学计算，计算两个embedding之间像不像
+通过embedding模型来完成
+
+2、LangChain：是一个LLM框架，封装了很多的工具
+qa_chain，在LangChain专门回答QA，封装了一些 chain_type
+
+3、多模态检索
+1) 文本检索
+2）图像检索
+可以从知识库中，检索到文本；
+也可以从知识库中，检索到图像；
+
+query => clip embedding中，和图像的clip embedding进行计算
+
+4、切片策略
+文档知识的颗粒度
+chunk_size=2000
+chunk_size=300
+LLM语义，句子
+
+数据预处理、检索、生成的关系.我理解这一堆就是RAG
+
+
+Q：可以设置多个embedding db，可以通过不同的参数（比如chunk size等）来应付不同的用户问题？
+可以设置多个db
+
+
+Q：做一个RAG是复杂工程，每个环节的工程质量都很重要。哪怕是想用提示词来实现，也需要操作者有读懂代码的能力，不要幻想一句提示词实现所有功能
+循序渐进
+
+Q：知识库，图像库与文本库，怎么信息关联，比如用户问某活动，要求图文回答
+按照规则
+1）先匹配文本embedding，找到相关的文本知识 => 文本知识的召回
+2）如果触发了某个关键词，或者通过LLM语义理解，用户想要检索图像
+=> 匹配图像embedding，找到相关的图像 => 图像知识的召回
+
+prompt:
+以下是文本知识：{chunk_list}
+以下是找到的图像内容：来自于XXX文件 {image_list}
+
+针对以上的知识，回答用户的问题：{query}
+
+Q：老师，这里的召回是专用名称吗
+召回：从海量的知识中，找到相关的
+1000万的视频 => 召回 快速筛选1000个你潜在感兴趣的视频 => 重排 Top20
+1000万的chunk => 召回 快速筛选1000个chunk => 重排Top20
+
+Q：老师，向量数据库和向量矩阵有什么关系？
+向量数据库是个管理软件，里面提供了很多功能，比如向量的计算
+向量矩阵就是原始的数据格式
+
+Q：如果数据是矛盾的，如何干掉错误的数据？
+AI可以帮我们发现检测冲突
+=> 最终由人来确认，去掉那个
+
+
+Q：重排的具体策略是什么
+重排会有rerank模型进行计算
+
+Q: AI怎么检测冲突呢？
+不能穷举的事情，需要LLM的能力（更加的泛化）
+prompt:
+给你相关的知识
+知识A：
+知识B：
+知识C：
+
+将帮我检测以上的知识之间是否有冲突，比如XXX
+JSON格式
+{"冲突点": ""}
+
+Q: 知识库数据怎么更新？
+1）重新index
+2）通过向量数据库，去掉某个知识，添加某个新的知识
+
+
+
+Q：reward model 就是重排策略吗？
+是rerank model
+
+Q：在一个查询对话框，如何知道哪些问题用RAG回答，哪些直接用LLM回答就好？
+如果LLM能直接回答，可以直接回答（你可以给一个置信度）
+如果LLM不能直接回答，需要调用联网搜索（可以通过 tool，进行外部查询，得到知识，进行RAG回答）
+
+可以将RAG分类，注册成Tool，给到 Agent，自主进行判断
+
+Q: 下载了这么多模型，怎么知道每个模型怎么用？
+看大模型的首页介绍里面的例子，先跑通，再理解
+
+
+
+
+
+
+
+
