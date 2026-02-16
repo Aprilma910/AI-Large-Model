@@ -1,0 +1,72 @@
+Q：老师如何看待企业官方ai和外部ai的矛盾，就是很多企业员工宁愿冒风险使用外部的AI工具，而不愿意使用自研的。
+很多员工确实愿意用外部的AI，因为方便
+公司内部的AI，很多是部署DeepSeek-R1蒸馏的版本，会有幻觉
+可以部署 qwen3-8B
+
+Q：老师好 有个问题
+我最近在做一个鉴别图片中的错别字功能
+先是用通过ocr把图中的文字提取出 然后交给大模型做错别字判断
+请问有啥办法可以 可以让图中的文字识别准确率提高吗?
+可以用 paddle-ocr
+https://github.com/PaddlePaddle/PaddleOCR
+
+https://aistudio.baidu.com/
+
+Q：老师，各种智能体架构，本质上是不同流程的提示词工程吗？
+提示词工程师 Agent中的一个重要部分
+Function Call, MCP， RAG，text2sql, memory
+
+我去年用单机C#+Paddle，识别的效果挺好，今年要改造成Java+web前端的，然后用了好几种ocr，出来效果都达不到我单机的效果
+
+图像视觉理解：
+1）通用 => Qwen-VL
+2) 文字识别OCR => PaddleOCR
+
+Qwen-VL 可能遇到的盲区：
+以前训练的样本，不均衡，所以如果你给一些小众的情况，它可能识别不出来
+
+Q：新发布的车型应该不会吧，还是ai遇到不能识别的车型，要上网查询
+微调
+
+
+https://github.com/QwenLM/Qwen2.5-VL
+https://github.com/QwenLM/Qwen2.5-VL/tree/main/qwen-vl-finetune
+
+A100， H100 => 适合做训练
+GTX4090 =>适合推理
+
+excel
+
+https://modelscope.cn/models/OpenGVLab/InternVideo2_5_Chat_8B
+https://arxiv.org/abs/2501.12386
+
+公司有私有化部署的需求，基于python跑本地的模型和用Ollama部署模型相比，性能以及模型更新的及时性是不是会更好？
+1) 模型会及时更新到 modelscope，可以下载最新的模型
+2）性能如果要求比较高，可以用 vllm 进行部署
+
+https://modelscope.cn/
+
+Q：qianwen vl适用于分析已有APP界面截图，并进行UI风格设计和美化任务吗？
+对APP界面进行理解是可以的
+要对UI风格进行设计和美化 => Claude 
+
+Q: 老师刚才说intern-viedo有
+识别400个场景的，怎么知道它能识别哪400个场景？要新增一个场景需要进一步训练微调吗？新场景至少需要多少个标注的样本？
+Kinetics（K400)
+https://github.com/cvdfoundation/kinetics-dataset
+
+Q：表格用什么形式来表示，对AI来说 理解能力更强？
+marktable
+---- ||
+html
+
+
+Q: minerU 一般什么情况下使用呢？
+1）解析PDF的时候
+2）网页抓取
+AI搜索引擎，需要对网页内容进行抓取，可以用mineru进行解析
+
+mineru本地部署需要什么样的环境支持？笔记本电脑能本地部署mineru吗？
+笔记本电脑可以部署mineru
+
+magic-pdf封装了mineru吗
